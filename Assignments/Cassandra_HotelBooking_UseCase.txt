@@ -1,0 +1,40 @@
+CREATE KEYSPACE hotelbooking
+WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': '1' }
+AND DURABLE_WRITES = true;
+
+USE hotelbooking;
+
+1.Create a table available_rooms_by_hotel_date as per the above requirement with hotel_id as the partition key, while date androom_numberare clustering columns.
+CREATE TABLE  available_rooms_by_hotel_date (hotel_id TEXT, date DATE, room_number SMALLINT, is_available BOOLEAN, PRIMARY KEY (hotel_id, date, room_number));
+
+2.Bulk load to table available_rooms_by_hotel_dataFROMavailable_rooms.csvHint:Use copy command in cqlsh
+COPY available_rooms_by_hotel_date FROM '/home/edureka/Downloads/509_m4_dataset_cs3_v1.0.csv' WITH DELIMITER = ',' AND HEADER = 'TRUE' AND DATETIMEFORMAT='yyyy-MM-dd';
+
+3.Display all the records in available_rooms_by_hotel_date for a particularhotel_id (ex: AZ123)androom_number (ex: 101). Remember both hotel_id and room_number are part of composite primary key.
+CREATE INDEX a_rm_htl_dt_rm_num
+ON available_rooms_by_hotel_date(room_number);
+
+SELECT * FROM available_rooms_by_hotel_date WHERE hotel_id = 'AZ123' AND room_number = 104;
+
+4.Display all records for a particular hotel between two specific date range in descending order of date.
+SELECT * FROM available_rooms_by_hotel_date WHERE hotel_id = 'AZ123' AND  date > '2016-01-01' AND date < '2016-01-21' ALLOW FILTERING;
+
+5.Write an UDF isavailable which return 1 if a room is available else return 0. Make a call to the UDF to display the results for table available_rooms_by_hotel_date.
+CREATE OR REPLACE FUNCTION isavailable(input BOOLEAN) CALLED ON NULL INPUT RETURNS TINYINT
+LANGUAGE java AS 'if(input == true) return 1; else return 0;';
+
+SELECT hotel_id, date, room_number, isavailable(is_available) AS availability FROM available_rooms_by_hotel_date WHERE hotel_id = 'AZ123' AND  date > '2016-01-01' AND date < '2016-01-21' ALLOW FILTERING;
+
+6.Create UDF/UDFs to return the total available rooms.
+CREATE OR REPLACE FUNCTION totalState ( state tuple<int,bigint>, val int ) CALLED ON NULL INPUT RETURNS tuple<int,bigint> LANGUAGE java AS 
+  'if (val !=null) { state.setInt(0, state.getInt(0)+1); state.setLong(1, state.getLong(1)+val.intValue()); } return state;';
+CREATE OR REPLACE FUNCTION totalFinal ( state tuple<int,bigint> ) CALLED ON NULL INPUT RETURNS bigint LANGUAGE java AS 
+  'long r = 0; if (state.getInt(0) == 0) return null; r = state.getLong(1); return r;';
+
+CREATE AGGREGATE IF NOT EXISTS total ( int ) 
+SFUNC totalState STYPE tuple<int,bigint> FINALFUNC totalFinal INITCOND (0,0);
+
+SELECT TOTAL(1) FROM available_rooms_by_hotel_date WHERE is_available = true ALLOW FILTERING;
+
+
+

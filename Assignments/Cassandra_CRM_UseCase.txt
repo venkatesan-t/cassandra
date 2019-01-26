@@ -1,0 +1,77 @@
+CREATE KEYSPACE crm
+WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': '1' }
+AND DURABLE_WRITES = true;
+
+USE crm;
+
+1. Create customer table if only if they don't exist already.
+CREATE TABLE IF NOT EXISTS customer_relation_management (first_name TEXT, last_name TEXT, title TEXT, PRIMARY KEY (first_name));
+
+2. Write a couple of rows, but only if same rows don't exist already
+INSERT INTO customer_relation_management (first_name, last_name, title) VALUES ('Ramkumar', 'Posina', 'MR.') IF NOT EXISTS;
+INSERT INTO customer_relation_management (first_name, last_name, title) VALUES ('Kumar', 'Rajesh', 'MR.') IF NOT EXISTS;
+
+3. Add a unique identifier (say id) using a uuid
+ALTER TABLE customer_relation_management
+ADD (id UUID);
+
+4. Allow Cassandra to auto-assign a uuid.
+Hint: Use SET id = uuid ()
+INSERT INTO customer_relation_management (first_name, last_name, title, id) VALUES ('Deepa', 'Rajaram', 'MR.', UUID()) IF NOT EXISTS;
+
+5. Modify the customer table to a set column type to contain email addresses
+ALTER TABLE customer_relation_management
+ADD (email_addresses Set<TEXT>);
+
+6. Add an email address and check that it was added successfully
+UPDATE customer_relation_management SET email_addresses = { 'deepar95@gmail.com' } WHERE first_name = 'Deepa';
+INSERT INTO customer_relation_management (first_name, last_name, title, id, email_addresses)
+VALUES ('Guru', 'Balakrishnan', 'MR.', UUID(), { 'gurub85@gmail.com', 'gurub85@yahoo.com' });
+
+7. Modify the customer table to add a list of phone numbers
+ALTER TABLE customer_relation_management
+ADD (phone_numbers LIST<TEXT>);
+
+8. Update the table data to add phone number (inside the list) for an existing
+customer.
+UPDATE customer_relation_management SET phone_numbers = [ '8027456567', '4270704366' ] WHERE first_name = 'Deepa';
+
+a. Replace an individual item in the list (i.e. a phone number) referenced by its
+index
+Hint: Use SET phone_numbers [0]
+UPDATE customer_relation_management SET phone_numbers[0] = '7024566668' WHERE first_name = 'Deepa';
+
+9. Add a map attribute to store information about an existing customer’s logins a timestamp (timeuuid) and a sessionID
+Example: login_sessions map<timeuuid, int>
+Hint: Use the now () function to allow Cassandra to set the timestamp
+ALTER TABLE customer_relation_management
+ADD (login_sessions MAP<timeuuid, int>);
+
+UPDATE customer_relation_management SET login_sessions = login_sessions + { NOW(): 12345 } WHERE first_name = 'Guru';
+UPDATE customer_relation_management SET login_sessions = login_sessions + { NOW(): 12346 } WHERE first_name = 'Guru';
+
+10.Create a User Defined Type(UDT) for address information
+Example: address (street text, city text, state text, zip_code int)
+CREATE TYPE address_type (street TEXT, city TEXT, state TEXT, zip_code INT);
+
+11.Use this UDT in a Map
+Example: addresses map<text, address>
+Hint: Freeze the UDT so we can use it in a map i.e. frozen<address>
+ALTER TABLE customer_relation_management
+ADD (addresses MAP<TEXT, FROZEN<address_type>>);
+
+UPDATE customer_relation_management SET addresses = addresses + { 'Home': { street: 'Mount Street', city: 'London', state: 'Pandora', zip_code: 4739266 } } WHERE first_name = 'Guru';
+
+12.Create a secondary index for the last_name column.
+CREATE INDEX crm_last_name
+ON customer_relation_management(last_name);
+
+SELECT * FROM customer_relation_management WHERE last_name = 'Posina';
+
+
+13.Create a SSTable Attached Secondary Index (SASI)
+Hint: Use org.apache.cassandra.index.sasi.SASIIndex class
+
+CREATE CUSTOM INDEX crm_last_name_sasi ON customer_relation_management (last_name) USING 'org.apache.cassandra.index.sasi.SASIIndex';
+
+SELECT * FROM customer_relation_management WHERE last_name LIKE 'Pos%';

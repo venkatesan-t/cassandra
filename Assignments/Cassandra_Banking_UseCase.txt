@@ -1,0 +1,47 @@
+CREATE KEYSPACE banking
+WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': '1' } AND
+DURABLE_WRITES = true;
+
+USE banking;
+
+CREATE TABLE uservisits(datetime TIMESTAMP, pageid TEXT, browser TEXT, device TEXT, PRIMARY KEY(datetime, pageid, browser, device));
+
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-01-01', 'home', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-01-06', 'search', 'Firefox', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-01-07', 'promotional', 'Chrome', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-01-11', 'dealofday', 'Firefox', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'dealofday', 'Firefox', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Firefox', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'dealofday', 'Firefox', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'search', 'Chrome', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'dealofday', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Chrome', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'search', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Firefox', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'promotional', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Chrome', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'promotional', 'Firefox', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'dealofday', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Firefox', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'dealofday', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'home', 'Chrome', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-05-11', 'search', 'Firefox', 'Android');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-01-01', 'home', 'Firefox', 'IOS');
+INSERT INTO uservisits (datetime, pageid, browser, device) VALUES ('2017-01-01', 'dealofday', 'Chrome', 'Android');
+
+CREATE INDEX uservisits_device
+ON uservisists (device);
+
+1.Number of clicks on deal of the day page with Android device on 11 May 2017
+SELECT COUNT(1) FROM uservisits WHERE datetime = '2017-05-11' AND pageid = 'dealofday' AND device = 'Android' ALLOW FILTERING;
+
+2.Number of clicks on deal of the page with IOS device on 11 May 2017
+SELECT COUNT(1) FROM uservisits WHERE datetime = '2017-05-11' AND pageid = 'dealofday' AND device = 'Android' ALLOW FILTERING;
+
+3.Number of clicks on home page with Chrome browser on 11 May 2017
+SELECT COUNT(1) FROM uservisits WHERE datetime = '2017-05-11' AND pageid = 'home' AND browser = 'Chrome';
+
+4.Number of clicks on home page on Firefox browser on 11 May 2017
+SELECT COUNT(1) FROM uservisits WHERE datetime = '2017-05-11' AND pageid = 'home' AND browser = 'Firefox';

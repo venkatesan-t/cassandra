@@ -1,0 +1,32 @@
+CREATE KEYSPACE stockexchange
+WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': '1' } AND
+DURABLE_WRITES = true;
+
+USE stockexchange;
+
+CREATE TABLE stockdaily (
+symbol TEXT,
+description TEXT,
+exchange TEXT,
+tick_date DATE,
+open FLOAT,
+high FLOAT,
+low FLOAT,
+close FLOAT,
+volume BIGINT,
+PRIMARY KEY (exchange, tick_date, symbol));
+
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NASDAQ', '2017-11-21', 'AAPL', 'Apple Corporation Inc.', 101.09, 109.03, 102.89, 107.85, 4269736636);
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NASDAQ', '2017-11-21', 'FB', 'Facebook Corporation Inc.', 161.09, 169.03, 162.89, 167.85, 3463926565);
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NASDAQ', '2017-11-22', 'AAPL', 'Apple Corporation Inc.', 101.09, 109.03, 102.89, 107.85, 4269736636);
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NASDAQ', '2017-11-22', 'FB', 'Facebook Corporation Inc.', 161.09, 169.03, 162.89, 167.85, 3463926565);
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NYSE', '2017-11-21', 'AAPL', 'Apple Corporation Inc.', 101.09, 109.03, 102.89, 107.85, 4269736636);
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NYSE', '2017-11-21', 'FB', 'Facebook Corporation Inc.', 161.09, 169.03, 162.89, 167.85, 3463926565);
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NYSE', '2017-11-22', 'AAPL', 'Apple Corporation Inc.', 101.09, 109.03, 102.89, 107.85, 4269736636);
+INSERT INTO stockdaily (exchange, tick_date, symbol, description, open, high, low, close, volume) VALUES('NYSE', '2017-11-22', 'FB', 'Facebook Corporation Inc.', 161.09, 169.03, 162.89, 167.85, 3463926565);
+
+A.All the daily close prices and descriptions of the stocks listed in the NASDAQ exchange.
+SELECT close, description FROM stockdaily WHERE exchange = 'NASDAQ';
+
+B.All day close prices and descriptions of the stocks listed in the NASDAQ exchange on November 21, 2017.
+SELECT close, description FROM stockdaily WHERE exchange = 'NASDAQ' AND tick_date = '2017-11-21';

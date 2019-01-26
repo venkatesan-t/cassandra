@@ -1,0 +1,34 @@
+1.Is there an increase in the time reading the data from table?
+we can run the commands below and check the fields "Local read latency" and "Local write latency"
+nodetool cfstats hotelbooking.available_rooms_by_hotel_date
+
+2.Are all the nodes up?
+we can run the command below and check whether all the values under first column are "UN"
+nodetool status
+
+3.Are there a lot of hints replayed?
+we can run the command below and check the counts against the field "HintsDispatcher";
+nodetool tpstats
+
+4.What is the Garbage Collection statistics?
+The statistics can be used to understand the behavior of the JVM heap management and the efficiency of the JVM.
+
+5.Is compaction causing additional latencies?
+Yes
+
+6.Are there a lot of threads flush pending?
+we can run the command below and check the counts against the fields MemtablePostFlush, "PerDiskMemtableFlushWriter_0" and "MemtableFlushWriter";
+nodetool tpstats
+
+7.Is there a streaming in progress?
+we can see that using the below command
+nodetool -h 127.0.0.1 netstats
+
+8.How much memory available, including the size of each generation space on the heap?
+We can see that in JConsole Memory tab Used and Max fields
+
+9.Is there any thread deadlock, what’s the peak number of threads, and current live threads?
+We can find that in JConsole Total blocked fields
+
+10.What is the application uptime?
+We can find that in JConsole VM Summary Uptime field

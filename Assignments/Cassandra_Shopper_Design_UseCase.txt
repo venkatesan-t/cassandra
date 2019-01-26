@@ -1,0 +1,12 @@
+1.Ideally How many Cassandra nodes(minimum) you should have in your cluster to make sure it is highly available?
+Three nodes are required in Cassandra cluster to make the cluster highly available
+2.What will be the replication factor and why?
+We need replication factor as three for high data availability
+3.What will be consistency levels for both Read and Write? Provide explanation whichever level you choose.
+We choose consistency level of QUORUM, to get the latest data. If we choose ALL, the reads or writes will fail, if one of the node is down.
+4.If price and inventory are changing frequently what will be your ideal approach to handle them?
+We can add EFFECTIVE_FROM column in the table to store the date the price and inventory is effective from. The EFFECTIVE_FROM column should be part of the composite primary key.
+If the price or inventory changes we add a new row with the day's date in EFFECTIVE_FROM. The price and inventory is valid till the next EFFECTIVE_FROM for the product.
+5.If you are getting frequent updates,what should be your strategy or assumption while designing schema?
+If are getting frequent updates, the database design should support temporal data.
+We achieve temporal behaviour using the EFFECTIVE_FROM column.

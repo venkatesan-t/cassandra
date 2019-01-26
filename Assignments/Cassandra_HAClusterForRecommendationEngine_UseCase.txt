@@ -1,0 +1,15 @@
+1.To ensure high availability we create 2 datacentres with replication factor at least 2.
+Setup the cluster with replication factor as 2
+2.Use an appropriate Snitch protocol to support the multi-data centercluster.
+Using GossipPropertyFileSnitch
+3.Use an appropriate partitioner to enable faster read operation and uniform data distribution.
+Using Murmur3Partition
+4.Ensure the replication factor can be met even if a number of healthy nodes is lesser than the replication factor. Hint: Use hinted handoff.
+Using hinted handoff to enable coordinator node to record requests to nodes which are down
+5.Device a mechanism to test that replication factor is eventually met after a dead node is made up again.
+6.Ensure high level of read and write availability
+We can query and write data with read and write consistency of QUORUM
+7.The use case doesn’t require to deal with most recent data. So, consistency level can be kept low for read and write.
+We can query and write data with read and write consistency of QUORUM
+8.Display the cluster status in a command line.Hint:Use nodetool command.
+nodetool status

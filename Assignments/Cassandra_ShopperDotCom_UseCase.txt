@@ -1,0 +1,44 @@
+CREATE KEYSPACE shopperdotcom
+WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor': '1' }
+AND DURABLE_WRITES = true;
+
+USE shopperdotcom;
+
+CREATE TABLE product(
+productid UUID, productname TEXT, productdesc TEXT, productcode TEXT, quantity BIGINT, price FLOAT, mrp FLOAT, creationtime TIMESTAMP, sellercode TEXT, category TEXT, brand TEXT,
+PRIMARY KEY(productid, category, brand, sellercode, productcode)
+);
+
+INSERT INTO product (productid, productname, productdesc, productcode, quantity, price, mrp, creationtime, sellercode, category, brand)
+VALUES (UUID(), 'IPhone X 128GB', 'IPhone X 128GB with Retina Display', 'IPhoneX128GB', 89476, 89999.00, 89999.00, toTimestamp(NOW()), 'APPLE', 'Mobile Phone', 'Apple');
+INSERT INTO product (productid, productname, productdesc, productcode, quantity, price, mrp, creationtime, sellercode, category, brand)
+VALUES (UUID(), 'IPhone 8 64GB', 'IPhone 8 64GB with Retina Display', 'IPhone864GB', 4324, 69999.00, 69999.00, '2017-07-01', 'APPLE', 'Mobile Phone', 'Apple');
+INSERT INTO product (productid, productname, productdesc, productcode, quantity, price, mrp, creationtime, sellercode, category, brand)
+VALUES (UUID(), 'Bosch 7 KG Frontload', 'Bosch 7 KG Frontload', 'Bosch7KGFrontload', 653, 39999.00, 39999.00, '2018-07-01', 'BOSCH', 'Appliance Washing Machine', 'Bosch');
+INSERT INTO product (productid, productname, productdesc, productcode, quantity, price, mrp, creationtime, sellercode, category, brand)
+VALUES (UUID(), 'Bosch 7 KG Frontload XG', 'Bosch 7 KG Frontload XG', 'Bosch7KGFrontloadXG', 2080, 44999.00, 44999.00, '2018-09-01', 'BOSCH', 'Appliance Washing Machine', 'Bosch');
+
+a)Product details by Product Code
+CREATE INDEX product_product_code
+ON product (productcode);
+SELECT * FROM product WHERE productcode = 'IPhoneX128GB';
+
+b)All Products sold by a seller for a specific category
+CREATE INDEX product_seller_code
+ON product (sellercode);
+SELECT * FROM product WHERE category = 'Appliance Washing Machine' AND sellercode = 'BOSCH' ALLOW FILTERING;
+
+c)All Products belong to the same category
+SELECT * FROM product WHERE category = 'Mobile Phone' ALLOW FILTERING;
+
+d)Products belongs to the same brand
+CREATE INDEX product_brands
+ON product (brand);
+SELECT * FROM product WHERE brand = 'Apple';
+
+e)Products by Brand and Category
+SELECT * FROM product WHERE category = 'Mobile Phone' AND  brand = 'Apple' ALLOW FILTERING;
+SELECT * FROM product WHERE category = 'Appliance Washing Machine' AND  brand = 'Bosch' ALLOW FILTERING;
+
+f)Products by Seller Code
+SELECT * FROM product WHERE sellercode = 'BOSCH';

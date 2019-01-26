@@ -1,0 +1,43 @@
+1. Provide information about database type which you are opting RDBMS/NoSQL/GRAPH?
+We can use one of the NoSQL databases, as these databases have horizontal scalability and good performance when accessed using key.
+2. Provide information about database why you selected?
+I'm choosing Cassandra because it has very good write/read speeds.
+We can query based on columns other than the key. In this use case, we can query UserProductLikes based on User or Product.
+3. Provide schema details along with Primary/Partition/Composite/Clustering keys?
+CREATE KEYSPACE purchaseitnow
+WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': 1 } AND
+DURABLE_WRITES = true;
+USE purchaseitnow;
+CREATE TABLE user (userid UUID PRIMARY KEY, username TEXT, address MAP<TEXT, TEXT>);
+INSERT INTO user (userid, username, address) VALUES (UUID(), 'John', { 'Address Line 1': '7, Mount Road', 'City': 'London' });
+INSERT INTO user (userid, username, address) VALUES (UUID(), 'Sandra', { 'Address Line 1': '58, Carmel Street', 'City': 'New Jersy' });
+
+CREATE TABLE product (productid UUID PRIMARY KEY, productname TEXT, productdesc TEXT);
+INSERT INTO product (productid, productname, productdesc) VALUES (UUID(), 'iPhone X', 'iPhone X comes with Retina display');
+INSERT INTO product (productid, productname, productdesc) VALUES (UUID(), 'Fitbit 2', 'Fitbit 2 comes Blood Pressure sensors');
+
+CREATE TABLE userproductlike (username TEXT, productname TEXT, timestamp TIMESTAMP,
+PRIMARY KEY ((username, productname), timestamp))
+WITH CLUSTERING ORDER BY (timestamp DESC);
+
+INSERT INTO userproductlike (username, productname, timestamp) VALUES ('John', 'iPhone X', toTimestamp(NOW()));
+INSERT INTO userproductlike (username, productname, timestamp) VALUES ('John', 'Fitbit 2', toTimestamp(NOW()));
+INSERT INTO userproductlike (username, productname, timestamp) VALUES ('Sandra', 'Fitbit 2', toTimestamp(NOW()));
+INSERT INTO userproductlike (username, productname, timestamp) VALUES ('John', 'iPhone X', toTimestamp(NOW()));
+
+4. Get all products liked by a user should also return product names
+
+SELECT productname FROM userproductlike WHERE username = 'John' GROUP BY productname ALLOW FILTERING;
+
+5. Get all user names who have liked any products
+
+CREATE TABLE productuserlike (productname TEXT, username TEXT, timestamp TIMESTAMP,
+PRIMARY KEY ((productname, username), timestamp))
+WITH CLUSTERING ORDER BY (timestamp DESC);
+
+INSERT INTO productuserlike (username, productname, timestamp) VALUES ('John', 'iPhone X', toTimestamp(NOW()));
+INSERT INTO productuserlike (username, productname, timestamp) VALUES ('John', 'Fitbit 2', toTimestamp(NOW()));
+INSERT INTO productuserlike (username, productname, timestamp) VALUES ('Sandra', 'Fitbit 2', toTimestamp(NOW()));
+INSERT INTO productuserlike (username, productname, timestamp) VALUES ('John', 'iPhone X', toTimestamp(NOW()));
+
+SELECT username FROM productuserlike WHERE productname = 'Fitbit 2' GROUP BY username ALLOW FILTERING;

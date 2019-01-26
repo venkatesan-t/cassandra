@@ -1,0 +1,36 @@
+CREATE KEYSPACE getyourlocation
+WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': '1'} AND
+durable_writes = true;
+
+USE getyourlocation;
+
+CREATE table userlocation(userid UUID, datetime TIMESTAMP, latitude float, longitude float, PRIMARY KEY (userid, datetime));
+
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(3bcd7ea4-80e4-40ea-b427-17193b3b2c56, toTimestamp(NOW()), 27.456, 86.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(50e3e4e1-66b6-49b4-987a-233ca441b7a6, toTimestamp(NOW()), -25.967, -56.765);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(b33f283f-0e34-42ec-9f4f-bb1214fe8b98, toTimestamp(NOW()), 07.456, 46.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(7d1c4a30-836c-4780-8192-8fe233ddfa35, toTimestamp(NOW()), 67.456, 86.072);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(50e3e4e1-66b6-49b4-987a-233ca441b7a6, toTimestamp(NOW()), 27.456, 86.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(3bcd7ea4-80e4-40ea-b427-17193b3b2c56, toTimestamp(NOW()), 67.546, 45.645);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(7d1c4a30-836c-4780-8192-8fe233ddfa35, toTimestamp(NOW()), 43.747, 64.756);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(b33f283f-0e34-42ec-9f4f-bb1214fe8b98, toTimestamp(NOW()), -65.456, 76.842);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(24e38cf6-14d4-469e-b6e8-face9f230263, toTimestamp(NOW()), 32.645, -56.473);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(3bcd7ea4-80e4-40ea-b427-17193b3b2c56, '2018-10-01', 27.456, 86.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(3bcd7ea4-80e4-40ea-b427-17193b3b2c56, '2018-08-21', 27.456, 86.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(50e3e4e1-66b6-49b4-987a-233ca441b7a6, '2018-10-01', 27.456, 86.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(50e3e4e1-66b6-49b4-987a-233ca441b7a6, '2018-08-21', 27.456, 86.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(b33f283f-0e34-42ec-9f4f-bb1214fe8b98, '2018-10-11', 43.456, 45.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(b33f283f-0e34-42ec-9f4f-bb1214fe8b98, '2018-08-31', 07.456, -56.838);
+INSERT INTO userlocation (userid, datetime, latitude, longitude) VALUES(3bcd7ea4-80e4-40ea-b427-17193b3b2c56, toTimestamp(NOW()), 65.456, -86.838);
+
+1. Get all locations of a user in a month
+SELECT * FROM userlocation WHERE userid = 3bcd7ea4-80e4-40ea-b427-17193b3b2c56 AND datetime > '2018-08-31' AND datetime < '2018-10-01';
+
+2. Get all locations of a user on a specific day or date range
+SELECT * FROM userlocation WHERE userid = 50e3e4e1-66b6-49b4-987a-233ca441b7a6 AND datetime > '2018-07-01' AND datetime < '2018-10-01';
+
+3. Get all locations of a user in last 6 hours
+SELECT * FROM userlocation WHERE userid = b33f283f-0e34-42ec-9f4f-bb1214fe8b98 AND datetime > '2018-09-28T06:26:45+0000' AND datetime < toTimestamp(NOW());
+
+4. Get all locations of a user in specific hour
+SELECT * FROM userlocation WHERE userid = 3bcd7ea4-80e4-40ea-b427-17193b3b2c56 AND datetime > '2018-09-28T12:00:00+0000' AND datetime <= '2018-09-28T13:00:00+0000';

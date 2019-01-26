@@ -1,0 +1,40 @@
+1. Run nodetool status to verify that the node is down (DN).
+2. Record the datacenter, address, and rack settings of the dead node; you will use these later.
+3. Add the replacement node to the network and record its IP address.
+4. If the dead node was a seed node, change the cluster's seed node configuration on each node:
+	a. In the cassandra.yaml file for each node, remove the IP address of the dead node from the - seeds list in the seed-provider property.
+	b. If the cluster needs a new seed node to replace the dead node, add the new node's IP address to the - seeds list.
+5. On an existing node, gather setting information for the new node from the cassandra.yaml file:
+	a. cluster_name
+	b. endpoint_snitch
+	c. Other non-default settings: Use the diff tool to compare current settings with default settings.
+6. Gather rack and datacenter information:
+	a. If the cluster uses the PropertyFileSnitch, record the rack and data assignments listed in the cassandra-topology.properties file, or copy the file to the new node.
+	b. If the cluster uses the GossipPropertyFileSnitch, Ec2Snitch, Ec2MultiRegionSnitch, or GoogleCloudSnitch, record the rack and datacenter assignments in the dead node's cassandra-rackdc.properties file.
+7. Make sure that the new node meets all prerequisites and then Install Cassandra on the new node, but do not start Cassandra.
+8. If Cassandra automatically started on the node, stop and clear the data that was added automatically on startup.
+9. Add values to the following properties in cassandara.yaml file from the information you gathered earlier:
+	a. auto_bootstrap: If this setting exists and is set to false, set it to true. (This setting is not included in the default cassandra.yaml configuration file.)
+	b. cluster_name
+	c. seed list
+10. Add the rack and datacenter configuration:
+	a. If the cluster uses the GossipPropertyFileSnitch, Ec2Snitch, Ec2MultiRegionSnitch, or GoogleCloudSnitch:
+		i. Add the dead node's rack and datacenter assignments to the cassandra-rackdc.properties file on the replacement node.
+		ii. Delete the cassandra-topology.properties file.
+	b. If the cluster uses the PropertyFileSnitch:
+		i. Copy the cassandra-topology.properties file from an existing node, or add the settings to the local copy.
+		ii. Edit the file to add an entry with the new node's IP address and the dead node's rack and datacenter assignments.
+11. Start the new node with the replace_address option, passing in the IP address of the dead node.
+	Cassandra package installations:
+		a. Add the following option to cassandra-env.sh file:
+			JVM_OPTS="$JVM_OPTS -Dcassandra.replace_address=address_of_dead_node
+		b. Start the node.
+		c. After the node bootstraps, remove the replace-address parameter from cassandra-env.sh.
+		d. Restart the node.
+
+	Cassandra tarball installations:
+		a. Start Cassandra with this option:
+			sudo bin/cassandra -Dcassandra.replace_address=address_of_dead_node
+12. Run nodetool status to verify that the new node has bootstrapped successfully.
+13. In environments that use the PropertyFileSnitch, wait at least 72 hours and then remove the old node's IP address from the cassandra-topology.properties file.
+This ensures that old node's information is removed from gossip. If removed from the property file too soon, problems may result. Use nodetool gossipinfo to check the gossip status. The node is still in gossip until LEFT status disappears.
